@@ -1,6 +1,6 @@
 ## Release Pilot
 
-Release Pilot is a MCP-powered daily digest surface that summarizes “what shipped and how it’s performing” for PMs and stakeholders. It aggregates release notes, health metrics, and incident context, then distributes the story through a Next.js chat UI and Slack. Digests persist via Prisma to SQLite by default, but you can point `DATABASE_URL` at Supabase/Neon/Postgres and the Prisma Neon adapter will handle the connection automatically.
+Release Pilot is a MCP-powered daily digest surface that summarizes "what shipped and how it's performing" for PMs and stakeholders. Now with real-time GitHub integration and AI-powered insights! It aggregates release notes, health metrics, and incident context, then distributes the story through a Next.js chat UI and Slack. Digests persist via Prisma to SQLite by default, but you can point `DATABASE_URL` at Supabase/Neon/Postgres and the Prisma Neon adapter will handle the connection automatically.
 
 ### Features
 
