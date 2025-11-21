@@ -1,15 +1,11 @@
 import "dotenv/config";
-import { App, ExpressReceiver } from "@slack/bolt";
+import { App } from "@slack/bolt";
 import { getLatestDigest } from "./digest-service";
-
-const receiver = new ExpressReceiver({
-  signingSecret: process.env.SLACK_SIGNING_SECRET || "",
-  endpoints: "/api/slack/events",
-});
 
 export const slackApp = new App({
   token: process.env.SLACK_BOT_TOKEN,
-  receiver,
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  processBeforeResponse: true,
 });
 
 // Slash command: /digest
@@ -171,6 +167,4 @@ function getTrendEmoji(trend: string): string {
       return "→";
   }
 }
-
-export const slackReceiver = receiver;
 
