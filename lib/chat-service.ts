@@ -1,7 +1,13 @@
+import "dotenv/config";
 import { randomUUID } from "node:crypto";
+import OpenAI from "openai";
 
 import { ChatMessage, DigestEntry, QuickAction } from "@/types/digest";
 import { getLatestDigest, listDigests } from "./digest-service";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const SYSTEM_PROMPT =
   "You are Release Pilot, an MCP-aware assistant that summarizes releases and health metrics for PMs. Keep answers grounded in provided digest data.";
@@ -63,7 +69,19 @@ export async function askDigestBot(
   const digests = await listDigests();
   const latest = digests[0];
 
-  const replyContent = buildReply(options, latest, digests);
+  // If OpenAI is configured, use it; otherwise fall back to canned responses
+  let replyContent: string;
+
+  if (process.env.OPENAI_API_KEY) {
+    try {
+      replyContent = await askOpenAI(options.message, digests);
+    } catch (error) {
+      console.warn("OpenAI error, falling back to canned response:", error);
+      replyContent = buildReply(options, latest, digests);
+    }
+  } else {
+    replyContent = buildReply(options, latest, digests);
+  }
 
   return {
     reply: {
@@ -126,6 +144,55 @@ function summarizeIncidents(digest: DigestEntry) {
   return `Incident recap:\n${digest.incidents
     .map((incident) => `• ${incident}`)
     .join("\n")}`;
+}
+
+async function askOpenAI(
+  message: string,
+  digests: DigestEntry[]
+): Promise<string> {
+  // Build context from recent digests
+  const context = digests
+    .slice(0, 3)
+    .map(
+      (d) =>
+        `Date: ${new Date(d.date).toLocaleDateString()}
+Status: ${d.status}
+Summary: ${d.summary}
+Highlights: ${d.highlights
+          .map((h) => `- ${h.title}: ${h.description}`)
+          .join("\n")}
+Metrics: ${d.metrics
+          .map((m) => `- ${m.label}: ${m.value} (${m.trend})`)
+          .join("\n")}
+Incidents: ${d.incidents.join("; ")}`
+    )
+    .join("\n\n---\n\n");
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: `You are Release Pilot, an AI assistant that helps PMs understand release health and deployment status. 
+
+Be concise and specific. Reference actual data from the digests provided. Use bullet points when listing multiple items. Keep responses under 150 words unless more detail is explicitly requested.
+
+Current context:
+${context}`,
+      },
+      {
+        role: "user",
+        content: message,
+      },
+    ],
+    temperature: 0.7,
+    max_tokens: 500,
+  });
+
+  return (
+    completion.choices[0]?.message?.content ||
+    "I couldn't generate a response. Please try again."
+  );
 }
 
 function fallbackSummary(

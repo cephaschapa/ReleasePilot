@@ -32,7 +32,10 @@ DATABASE_URL="file:./prisma/dev.db"
 # or Neon / Supabase / Postgres
 # DATABASE_URL="postgresql://user:pass@host/db?sslmode=require"
 
-SLACK_VERIFICATION_TOKEN="optional"
+# Slack Integration (see docs/slack-setup.md for full setup)
+SLACK_BOT_TOKEN="xoxb-..."                # Slack Bot User OAuth Token
+SLACK_SIGNING_SECRET="..."                # Slack App Signing Secret
+NEXT_PUBLIC_APP_URL="http://localhost:3000" # Your app URL (for buttons)
 
 ## DataDog Setup
 
@@ -61,6 +64,9 @@ To integrate with DataDog for real health metrics:
 ### MCP Integration (optional - falls back to mock data)
 GITHUB_TOKEN="ghp_..."                    # GitHub Personal Access Token for releases
 GITHUB_REPO="owner/repo"                  # GitHub repo (defaults to productId/productId)
+
+# OpenAI for LLM-powered chat (optional - falls back to canned responses)
+OPENAI_API_KEY="sk-proj-..."              # OpenAI API key for chat completions
 
 # DataDog Metrics (optional)
 DATADOG_API_KEY="..."                     # DataDog API Key
