@@ -69,15 +69,23 @@ export async function askDigestBot(
   const digests = await listDigests();
   const latest = digests[0];
 
-  // If OpenAI is configured, use it; otherwise fall back to canned responses
+  // If OpenAI is configured, try MCP-powered responses first, then fallback
   let replyContent: string;
-
+  
   if (process.env.OPENAI_API_KEY) {
     try {
-      replyContent = await askOpenAI(options.message, digests);
-    } catch (error) {
-      console.warn("OpenAI error, falling back to canned response:", error);
-      replyContent = buildReply(options, latest, digests);
+      // Try true MCP integration with function calling
+      const { askWithMcp } = await import("./openai-mcp");
+      replyContent = await askWithMcp(options.message, digests);
+    } catch (mcpError) {
+      console.warn("MCP error, trying standard OpenAI:", mcpError);
+      try {
+        // Fallback to standard OpenAI without MCP
+        replyContent = await askOpenAI(options.message, digests);
+      } catch (error) {
+        console.warn("OpenAI error, using canned response:", error);
+        replyContent = buildReply(options, latest, digests);
+      }
     }
   } else {
     replyContent = buildReply(options, latest, digests);

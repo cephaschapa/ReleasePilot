@@ -19,7 +19,6 @@ export async function POST(request: NextRequest) {
       const params = new URLSearchParams(rawBody);
       const command = params.get("command");
       const text = params.get("text") || "";
-      const responseUrl = params.get("response_url");
 
       if (command === "/digest") {
         const digest = await getLatestDigest();

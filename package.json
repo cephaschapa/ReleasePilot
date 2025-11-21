@@ -4,15 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && tsc mcp/server.ts --outDir mcp && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
+    "mcp:server": "tsx mcp/server.ts",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:generate": "prisma generate"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
     "@neondatabase/serverless": "^1.0.2",
     "@prisma/adapter-neon": "^7.0.0",
     "@prisma/client": "^7.0.0",
@@ -24,10 +26,11 @@
     "openai": "^6.9.1",
     "prisma": "^7.0.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "tsx": "^4.20.6"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^20.19.25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

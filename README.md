@@ -1,12 +1,13 @@
 ## Release Pilot
 
-Release Pilot is a MCP-powered daily digest surface that summarizes "what shipped and how it's performing" for PMs and stakeholders. Now with real-time GitHub integration and AI-powered insights! It aggregates release notes, health metrics, and incident context, then distributes the story through a Next.js chat UI and Slack. Digests persist via Prisma to SQLite by default, but you can point `DATABASE_URL` at Supabase/Neon/Postgres and the Prisma Neon adapter will handle the connection automatically.
+Release Pilot is a **true MCP-powered** daily digest surface that summarizes "what shipped and how it's performing" for PMs and stakeholders. Features real Model Context Protocol servers, OpenAI function calling, GitHub integration, and AI-powered insights! It aggregates release notes, health metrics, and incident context, then distributes the story through a Next.js chat UI and Slack. Digests persist via Prisma to SQLite by default, but you can point `DATABASE_URL` at Supabase/Neon/Postgres and the Prisma Neon adapter will handle the connection automatically.
 
 ### Features
 
 - **Digest timeline** – Server-rendered list of recent summaries with status, metrics, incidents, and source trails.
 - **Chat assistant** – “Release Pilot” chat with quick actions for latest digest, health metrics, and incidents. Backed by stubbed MCP/LLM logic (ready to swap for a real model).
-- **MCP simulation** – `lib/mcp-client.ts` mimics tool calls (`releases.fetchLatest`, `metrics.getHealth`, `incidents.listRecent`) so the UI works before wiring real endpoints.
+- **True MCP Integration** – `mcp/server.ts` implements a real Model Context Protocol server exposing tools (`releases_fetchLatest`, `metrics_getHealth`, `incidents_listRecent`) that OpenAI can dynamically call via function calling.
+- **MCP Client** – `lib/openai-mcp.ts` connects to the MCP server and orchestrates tool calls based on user questions.
 - **Digest orchestration API** – `/api/digests` exposes GET (list) and POST (trigger) endpoints that the UI, Slack, or scheduled jobs can call.
 - **Slack integration** – `/api/slack` handles slash commands and URL verification, responding with the latest digest.
 - **Documentation** – `docs/architecture.md` describes the end-to-end system, flow, and next steps (auth, DB, scheduling, true MCP/LLM).
