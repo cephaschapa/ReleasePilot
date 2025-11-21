@@ -71,7 +71,7 @@ export async function askDigestBot(
 
   // If OpenAI is configured, try MCP-powered responses first, then fallback
   let replyContent: string;
-  
+
   if (process.env.OPENAI_API_KEY) {
     try {
       // Try true MCP integration with function calling

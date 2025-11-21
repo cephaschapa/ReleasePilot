@@ -31,8 +31,8 @@ async function getMcpClient(): Promise<Client> {
     );
 
     const transport = new StdioClientTransport({
-      command: "node",
-      args: ["./mcp/server.js"],
+      command: "npx",
+      args: ["tsx", "./mcp/server.ts"],
     });
 
     await client.connect(transport);
