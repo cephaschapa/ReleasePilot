@@ -2,7 +2,7 @@
 
 Release Pilot is a **true MCP-powered** daily digest surface that summarizes "what shipped and how it's performing" for PMs and stakeholders. Features real Model Context Protocol servers, OpenAI function calling, GitHub integration, and AI-powered insights! It aggregates release notes, health metrics, and incident context, then distributes the story through a Next.js chat UI and Slack. Digests persist via Prisma to SQLite by default, but you can point `DATABASE_URL` at Supabase/Neon/Postgres and the Prisma Neon adapter will handle the connection automatically.
 
-### Features
+### Feature
 
 - **Digest timeline** – Server-rendered list of recent summaries with status, metrics, incidents, and source trails.
 - **Chat assistant** – “Release Pilot” chat with quick actions for latest digest, health metrics, and incidents. Backed by stubbed MCP/LLM logic (ready to swap for a real model).
@@ -26,7 +26,7 @@ npm run dev
 
 Create `.env` with:
 
-```
+````
 # SQLite (default dev)
 DATABASE_URL="file:./prisma/dev.db"
 
@@ -51,9 +51,10 @@ To integrate with DataDog for real health metrics:
    DATADOG_API_KEY="your-api-key-here"
    DATADOG_APP_KEY="your-app-key-here"
    DATADOG_SITE="datadoghq.com"  # or datadoghq.eu, etc.
-   ```
+````
 
 3. **Ensure Metrics Exist**:
+
    - The integration queries these metrics (customize queries in `lib/mcp-client.ts`):
      - `session.crash` and `session.count` (for crash-free rate)
      - `kubernetes_state.deployment.*` (for deployment success)
@@ -63,24 +64,30 @@ To integrate with DataDog for real health metrics:
    - Ensure your services are tagged with `service:your-product-id` in DataDog
 
 ### MCP Integration (optional - falls back to mock data)
-GITHUB_TOKEN="ghp_..."                    # GitHub Personal Access Token for releases
-GITHUB_REPO="owner/repo"                  # GitHub repo (defaults to productId/productId)
+
+GITHUB*TOKEN="ghp*..." # GitHub Personal Access Token for releases
+GITHUB_REPO="owner/repo" # GitHub repo (defaults to productId/productId)
 
 # OpenAI for LLM-powered chat (optional - falls back to canned responses)
-OPENAI_API_KEY="sk-proj-..."              # OpenAI API key for chat completions
+
+OPENAI_API_KEY="sk-proj-..." # OpenAI API key for chat completions
 
 # DataDog Metrics (optional)
-DATADOG_API_KEY="..."                     # DataDog API Key
-DATADOG_APP_KEY="..."                     # DataDog Application Key
-DATADOG_SITE="datadoghq.com"              # DataDog site (datadoghq.com, datadoghq.eu, etc.)
+
+DATADOG_API_KEY="..." # DataDog API Key
+DATADOG_APP_KEY="..." # DataDog Application Key
+DATADOG_SITE="datadoghq.com" # DataDog site (datadoghq.com, datadoghq.eu, etc.)
 
 # Alternative Metrics APIs (unimplemented placeholders)
+
 METRICS_API_URL="https://api.datadoghq.com" # Generic metrics API endpoint
-METRICS_API_KEY="..."                     # Generic metrics API authentication
+METRICS_API_KEY="..." # Generic metrics API authentication
 
 # Incidents API (unimplemented placeholder)
+
 INCIDENTS_API_URL="https://api.pagerduty.com" # Incidents API endpoint
-INCIDENTS_API_KEY="..."                   # Incidents API authentication
+INCIDENTS_API_KEY="..." # Incidents API authentication
+
 ```
 
 ### Key Commands
@@ -94,25 +101,27 @@ INCIDENTS_API_KEY="..."                   # Incidents API authentication
 ### Project Structure
 
 ```
+
 app/
-  api/
-    chat/route.ts      # Chat completion endpoint
-    digests/route.ts   # List or trigger digest runs
-    slack/route.ts     # Slash command responder
-  page.tsx             # Digest timeline + chat layout
+api/
+chat/route.ts # Chat completion endpoint
+digests/route.ts # List or trigger digest runs
+slack/route.ts # Slash command responder
+page.tsx # Digest timeline + chat layout
 components/
-  chat-panel.tsx & styles
-  digest-card.tsx & styles
+chat-panel.tsx & styles
+digest-card.tsx & styles
 lib/
-  chat-service.ts      # Quick actions + assistant replies
-  digest-service.ts    # Orchestrates MCP + Prisma persistence
-  mcp-client.ts        # Simulated MCP tool calls
-  mock-data.ts         # Temporary seed data
-  prisma.ts            # Prisma client helper
+chat-service.ts # Quick actions + assistant replies
+digest-service.ts # Orchestrates MCP + Prisma persistence
+mcp-client.ts # Simulated MCP tool calls
+mock-data.ts # Temporary seed data
+prisma.ts # Prisma client helper
 types/
-  digest.ts            # Shared domain types
+digest.ts # Shared domain types
 docs/
-  architecture.md
+architecture.md
+
 ```
 
 ### Next Steps
@@ -122,3 +131,4 @@ docs/
 - Add authentication + admin panel for configuring sources/schedules.
 - Connect Slack slash commands to OAuth/Bolt and push daily notifications.
 - Promote `/api/digests` to a scheduled Vercel Cron or external worker.
+```
