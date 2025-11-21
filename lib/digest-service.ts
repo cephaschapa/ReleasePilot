@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { Digest as PrismaDigest } from "@prisma/client";
+import type { Digest as PrismaDigest, Prisma } from "@prisma/client";
 
 import {
   DigestEntry,
@@ -88,9 +88,9 @@ export async function triggerDigestRun(
         summary,
         date: new Date(),
         status,
-        highlights: releases.payload,
-        metrics: metrics.payload,
-        incidents: incidents.payload,
+        highlights: releases.payload as unknown as Prisma.InputJsonValue,
+        metrics: metrics.payload as unknown as Prisma.InputJsonValue,
+        incidents: incidents.payload as unknown as Prisma.InputJsonValue,
         sources,
       },
     });
@@ -177,10 +177,10 @@ async function ensureSeedData() {
         summary: digest.summary,
         date: new Date(digest.date),
         status: digest.status,
-        highlights: digest.highlights,
-        metrics: digest.metrics,
-        incidents: digest.incidents,
-        sources: digest.sources,
+        highlights: digest.highlights as unknown as Prisma.InputJsonValue,
+        metrics: digest.metrics as unknown as Prisma.InputJsonValue,
+        incidents: digest.incidents as unknown as Prisma.InputJsonValue,
+        sources: digest.sources as unknown as Prisma.InputJsonValue,
       },
     });
   }
@@ -196,9 +196,9 @@ function mapDigest(record: PrismaDigest): DigestEntry {
     summary: record.summary,
     date: record.date.toISOString(),
     status: record.status,
-    highlights: record.highlights as ReleaseHighlight[],
-    metrics: record.metrics as HealthMetric[],
-    incidents: record.incidents as string[],
+    highlights: record.highlights as unknown as ReleaseHighlight[],
+    metrics: record.metrics as unknown as HealthMetric[],
+    incidents: record.incidents as unknown as string[],
     sources: record.sources as string[],
   };
 }
