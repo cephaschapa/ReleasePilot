@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DigestStatus {
+  healthy
+  warning
+  critical
+}
+
+model Digest {
+  id         String       @id @default(cuid())
+  productId  String
+  title      String
+  summary    String
+  date       DateTime
+  status     DigestStatus
+  highlights Json
+  metrics    Json
+  incidents  Json
+  sources    Json
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}

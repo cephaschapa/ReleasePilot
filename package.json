@@ -6,10 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:generate": "prisma generate"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@prisma/adapter-neon": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "@types/node-fetch": "^2.6.13",
+    "dotenv": "^17.2.3",
     "next": "16.0.3",
+    "node-fetch": "^3.3.2",
+    "prisma": "^7.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },

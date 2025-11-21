@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Release Pilot
 
-## Getting Started
+Release Pilot is a MCP-powered daily digest surface that summarizes “what shipped and how it’s performing” for PMs and stakeholders. It aggregates release notes, health metrics, and incident context, then distributes the story through a Next.js chat UI and Slack. Digests persist via Prisma to SQLite by default, but you can point `DATABASE_URL` at Supabase/Neon/Postgres and the Prisma Neon adapter will handle the connection automatically.
 
-First, run the development server:
+### Features
+
+- **Digest timeline** – Server-rendered list of recent summaries with status, metrics, incidents, and source trails.
+- **Chat assistant** – “Release Pilot” chat with quick actions for latest digest, health metrics, and incidents. Backed by stubbed MCP/LLM logic (ready to swap for a real model).
+- **MCP simulation** – `lib/mcp-client.ts` mimics tool calls (`releases.fetchLatest`, `metrics.getHealth`, `incidents.listRecent`) so the UI works before wiring real endpoints.
+- **Digest orchestration API** – `/api/digests` exposes GET (list) and POST (trigger) endpoints that the UI, Slack, or scheduled jobs can call.
+- **Slack integration** – `/api/slack` handles slash commands and URL verification, responding with the latest digest.
+- **Documentation** – `docs/architecture.md` describes the end-to-end system, flow, and next steps (auth, DB, scheduling, true MCP/LLM).
+
+### Getting Started
 
 ```bash
+npm install
+echo DATABASE_URL="file:./prisma/dev.db" > .env  # or set to your Postgres/Neon URL
+npx prisma migrate dev
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# visit http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create `.env` with:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+# SQLite (default dev)
+DATABASE_URL="file:./prisma/dev.db"
 
-## Learn More
+# or Neon / Supabase / Postgres
+# DATABASE_URL="postgresql://user:pass@host/db?sslmode=require"
 
-To learn more about Next.js, take a look at the following resources:
+SLACK_VERIFICATION_TOKEN="optional"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## DataDog Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To integrate with DataDog for real health metrics:
 
-## Deploy on Vercel
+1. **Create API Keys** in DataDog:
+   - Go to [DataDog API Keys](https://app.datadoghq.com/organization-settings/api-keys)
+   - Create an **API Key** and **Application Key**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Configure Environment**:
+   ```bash
+   DATADOG_API_KEY="your-api-key-here"
+   DATADOG_APP_KEY="your-app-key-here"
+   DATADOG_SITE="datadoghq.com"  # or datadoghq.eu, etc.
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Ensure Metrics Exist**:
+   - The integration queries these metrics (customize queries in `lib/mcp-client.ts`):
+     - `session.crash` and `session.count` (for crash-free rate)
+     - `kubernetes_state.deployment.*` (for deployment success)
+     - `trace.servlet.request` (for active usage)
+
+4. **Tag Your Services**:
+   - Ensure your services are tagged with `service:your-product-id` in DataDog
+
+### MCP Integration (optional - falls back to mock data)
+GITHUB_TOKEN="ghp_..."                    # GitHub Personal Access Token for releases
+GITHUB_REPO="owner/repo"                  # GitHub repo (defaults to productId/productId)
+
+# DataDog Metrics (optional)
+DATADOG_API_KEY="..."                     # DataDog API Key
+DATADOG_APP_KEY="..."                     # DataDog Application Key
+DATADOG_SITE="datadoghq.com"              # DataDog site (datadoghq.com, datadoghq.eu, etc.)
+
+# Alternative Metrics APIs (unimplemented placeholders)
+METRICS_API_URL="https://api.datadoghq.com" # Generic metrics API endpoint
+METRICS_API_KEY="..."                     # Generic metrics API authentication
+
+# Incidents API (unimplemented placeholder)
+INCIDENTS_API_URL="https://api.pagerduty.com" # Incidents API endpoint
+INCIDENTS_API_KEY="..."                   # Incidents API authentication
+```
+
+### Key Commands
+
+- `npm run dev` – start local development server.
+- `npm run build` – production build (Next.js).
+- `npm run lint` – lint with `eslint-config-next`.
+- `npm run prisma:migrate` – run `prisma migrate dev`.
+- `npm run prisma:studio` – open Prisma Studio for data inspection.
+
+### Project Structure
+
+```
+app/
+  api/
+    chat/route.ts      # Chat completion endpoint
+    digests/route.ts   # List or trigger digest runs
+    slack/route.ts     # Slash command responder
+  page.tsx             # Digest timeline + chat layout
+components/
+  chat-panel.tsx & styles
+  digest-card.tsx & styles
+lib/
+  chat-service.ts      # Quick actions + assistant replies
+  digest-service.ts    # Orchestrates MCP + Prisma persistence
+  mcp-client.ts        # Simulated MCP tool calls
+  mock-data.ts         # Temporary seed data
+  prisma.ts            # Prisma client helper
+types/
+  digest.ts            # Shared domain types
+docs/
+  architecture.md
+```
+
+### Next Steps
+
+- Scale SQLite to Supabase/Postgres for multi-environment deploys.
+- Wire MCP client to real tool hosts (e.g., GitHub releases, analytics APIs).
+- Add authentication + admin panel for configuring sources/schedules.
+- Connect Slack slash commands to OAuth/Bolt and push daily notifications.
+- Promote `/api/digests` to a scheduled Vercel Cron or external worker.
